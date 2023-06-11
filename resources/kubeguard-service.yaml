@@ -1,0 +1,27 @@
+---
+#! Service definition for all Kubeguard Components, being: 
+apiVersion: v1
+kind: Service
+metadata:
+  name: kubeguard
+  namespace: kubeguard
+  labels:
+    app: kubeguard
+spec:
+  type: LoadBalancer
+  selector:
+    app: kubeguard
+  ports:
+  - port: 53
+    targetPort: 53
+    protocol: UDP
+  - port: 3000
+    targetPort: 3000
+    protocol: TCP  
+  - port: 51820
+    targetPort: 51820
+    protocol: UDP
+  - port: 51821
+    targetPort: 51821
+    protocol: TCP
+  

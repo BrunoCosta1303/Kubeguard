@@ -1,0 +1,84 @@
+---
+#! Persistent volume claim to store all AdGuard Home configuration data
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: adguardhome
+  namespace: kubeguard
+  labels:
+    app: kubeguard
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+#! Deployment definition for AdGuard Home for a single instance container,
+#! storing configuration data on a persistent volume claim.
+#! The management web interface on port 3000 and the DNS port 53
+#! are be made accessible via Kubernetes service definition, see further below.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adguardhome
+  namespace: kubeguard
+  labels:
+    app: kubeguard
+spec:
+  restartPolicy: Never
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 0
+  selector:
+    matchLabels:
+      app: adguardhome
+  template:
+    metadata:
+      labels:
+        app: adguardhome
+    spec:
+      containers:
+      - name: adguardhome
+        image: adguard/adguardhome:latest
+        securityContext:
+          privileged: false
+          allowPrivilegeEscalation: false
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+        - containerPort: 53
+          protocol: UDP
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            cpu: "256m"
+            memory: "512Mi"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+        volumeMounts:
+        - name: adguardhome-config
+          mountPath: /opt/adguardhome/conf
+        - name: adguardhome-logs
+          mountPath: /opt/adguardhome/work
+      volumes:
+      - name: adguardhome-config
+        persistentVolumeClaim:
+          claimName: adguardhome
+      - name: adguardhome-logs
+        emptyDir: {}
+
+
+

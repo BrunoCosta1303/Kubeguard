@@ -1,0 +1,87 @@
+---
+#! Persistent volume claim to store all AdGuard Home configuration data
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wireguard
+  namespace: kubeguard
+  labels:
+    app: kubeguard
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+#! Deployment definition for WireGuard for a single instance container.
+#! Configuration data from a secret gets mounted as files into the container.
+#! The init container ensures forwarding is enabled.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wireguard
+  namespace: kubeguard
+  labels:
+    app: kubeguard
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: kubeguard
+  template:
+    metadata:
+      labels:
+        app: kubeguard
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: wireguard
+        image: weejewel/wg-easy:latest
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+            - NET_ADMIN
+              SYS_MODULE 
+        ports:
+        - containerPort: 51820
+          protocol: UDP
+        - containerPort: 51821
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 51821
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 51821
+        command:
+        - sh
+        - -c
+        - sysctl -w net.ipv4.ip_forward=1 && sysctl -w net.ipv4.conf.all.forwarding=1 && sysctl -w net.ipv4.conf.all.src_valid_mark=1
+        - /entrypoint.sh
+        env:
+        - name: PASSWORD
+          value: info
+        - name: WG_DEFAULT_DNS
+          value: info
+        - name: WG_HOST
+          value: info
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "728m"
+          limits:
+            cpu: "1024m"
+            memory: "1024Mi"
+        volumeMounts:
+        - name: wireguard-config
+          mountPath: /etc/wireguard/
+          readOnly: true
+
+
