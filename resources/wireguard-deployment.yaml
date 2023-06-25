@@ -1,82 +1,47 @@
 ---
-#! Persistent volume claim to store all AdGuard Home configuration data
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: wireguard
-  namespace: kubeguard
-  labels:
-    app: kubeguard
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 2Gi
-
----
-#! Deployment definition for WireGuard for a single instance container.
-#! Configuration data from a secret gets mounted as files into the container.
-#! The init container ensures forwarding is enabled.
-apiVersion: apps/v1
 kind: Deployment
+apiVersion: apps/v1
 metadata:
   name: wireguard
   namespace: kubeguard
-  labels:
-    app: kubeguard
 spec:
   replicas: 1
-  strategy:
-    type: Recreate
   selector:
     matchLabels:
-      app: kubeguard
+      app: wireguard
   template:
     metadata:
       labels:
-        app: kubeguard
+        app: wireguard
     spec:
       containers:
       - name: wireguard
-        image: weejewel/wg-easy:latest
-        securityContext:
-          privileged: true
-          capabilities:
-            add:
-            - NET_ADMIN
-              SYS_MODULE 
+        image: weejewel/wg-easy
         ports:
         - containerPort: 51820
           protocol: UDP
         - containerPort: 51821
           protocol: TCP
         env:
-        - name: PASSWORD
-          value: cinamonwhiskey
-        - name: WG_DEFAULT_DNS
-          value: 10.42.0.15
         - name: WG_HOST
-          value: kubeguard.mackeronis.net
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "728m"
-          limits:
-            cpu: "1024m"
-            memory: "1024Mi"
+          value: "127.0.0.1"
+        - name: WG_DEFAULT_DNS
+          value: "1.1.1.1"
+        securityContext:	# I am not sure if following is required, I haven't tried it without
+          privileged: true
+          capabilities:
+            add:
+            - NET_ADMIN
+            - SYS_MODULE
         volumeMounts:
-        - name: wireguard-config
-          mountPath: /etc/wireguard/
-          readOnly: true
+        - name: wireguard-volume	# stores wg-easy configuration 
+          mountPath: /etc/wireguard
         - name: lib-volume
-          mountPath: /lib/modules/
-      volumes: 
+          mountPath: /lib/modules	# makes available wireguard module to pod, this may not be required
+      volumes:
+      - name: wireguard-volume
+        hostPath:
+          path: /mnt/k3s/wireguard
       - name: lib-volume
         hostPath:
           path: /lib/modules
-      - name: wireguard-config
-        persistentVolumeClaim:
-          claimName: wireguard
-
-
