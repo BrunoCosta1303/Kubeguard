@@ -12,16 +12,20 @@ spec:
   selector:
     app: kubeguard
   ports:
-  - port: 53
+  - name: domain-name-service
+    port: 53
     targetPort: 53
     protocol: UDP
-  - port: 3000
+  - name: adguard-console
+    port: 3000
     targetPort: 3000
     protocol: TCP  
-  - port: 51820
+  - name: wireguard-vpn
+    port: 51820
     targetPort: 51820
     protocol: UDP
-  - port: 51821
+  - name: wireguard-console
+    port: 51821
     targetPort: 51821
     protocol: TCP
   

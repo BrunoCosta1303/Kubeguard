@@ -37,7 +37,6 @@ spec:
       labels:
         app: kubeguard
     spec:
-      restartPolicy: Never
       containers:
       - name: wireguard
         image: weejewel/wg-easy:latest
@@ -52,26 +51,13 @@ spec:
           protocol: UDP
         - containerPort: 51821
           protocol: TCP
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 51821
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 51821
-        command:
-        - sh
-        - -c
-        - sysctl -w net.ipv4.ip_forward=1 && sysctl -w net.ipv4.conf.all.forwarding=1 && sysctl -w net.ipv4.conf.all.src_valid_mark=1
-        - /entrypoint.sh
         env:
         - name: PASSWORD
-          value: info
+          value: cinamonwhiskey
         - name: WG_DEFAULT_DNS
-          value: info
+          value: 10.42.0.15
         - name: WG_HOST
-          value: info
+          value: kubeguard.mackeronis.net
         resources:
           requests:
             memory: "512Mi"
@@ -83,5 +69,14 @@ spec:
         - name: wireguard-config
           mountPath: /etc/wireguard/
           readOnly: true
+        - name: lib-volume
+          mountPath: /lib/modules/
+      volumes: 
+      - name: lib-volume
+        hostPath:
+          path: /lib/modules
+      - name: wireguard-config
+        persistentVolumeClaim:
+          claimName: wireguard
 
 
