@@ -21,6 +21,9 @@ EOF
 dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
 dnf install -y docker-ce containerd.io
 
+swapoff -a
+modprobe br_netfilter
+
 systemctl enable docker
 systemctl start docker
 
@@ -30,7 +33,7 @@ systemctl start containerd
 setnforce 0
 sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
 
-modprobe br_netfilter
+
 
 firewall-cmd --add-masquerade --permanent
 firewall-cmd --reload
