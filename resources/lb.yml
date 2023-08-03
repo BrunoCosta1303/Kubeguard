@@ -1,0 +1,40 @@
+#! Service definition for all Kubeguard Components, being: 
+apiVersion: v1
+kind: Service
+metadata:
+  name: kubeguard-tcp-service-lb
+  namespace: kubeguard
+spec:
+  selector:
+    app: kubeguard
+  ports:
+  - name: adguard-console
+    port: 3000
+    protocol: TCP
+    targetPort: 3000
+  - name: wireguard-console
+    port: 51821
+    protocol: TCP
+    targetPort: 51821
+  type: LoadBalancer
+
+---
+#! Service definition for all Kubeguard Components, being: 
+apiVersion: v1
+kind: Service
+metadata:
+  name: kubeguard-udp-service-lb
+  namespace: kubeguard
+spec:
+  selector:
+    app: kubeguard
+  ports:
+  - name: adguard-dns
+    port: 53
+    protocol: UDP
+    targetPort: 53
+  - name: wireguard-vpn
+    port: 51820
+    protocol: UDP
+    targetPort: 51820
+  type: LoadBalancer
