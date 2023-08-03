@@ -1,0 +1,73 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: wireguard
+  namespace: kubeguard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kubeguard
+  template:
+    metadata:
+      labels:
+        app: kubeguard
+    spec:
+      containers:
+      - name: wireguard
+        image: weejewel/wg-easy
+        ports:
+        - containerPort: 51820
+          protocol: UDP
+        - containerPort: 51821
+          protocol: TCP
+        env:
+        - name: WG_HOST
+          value: localhost
+        - name: vpn.example.com
+          value: 1.1.1.1
+        securityContext: # I am not sure if following is required, I haven't tried it without
+          privileged: true
+          capabilities:
+            add:
+            - NET_ADMIN
+            - SYS_MODULE
+        volumeMounts:
+        - name: wireguard-volume # stores wg-easy configuration 
+          mountPath: /etc/wireguard
+        - name: lib-volume
+          mountPath: /lib/modules # makes available wireguard module to pod, this may not be required
+      volumes:
+      - name: wireguard-volume
+        hostPath:
+          path: /mnt/k3s/wireguard
+      - name: lib-volume
+        hostPath:
+          path: /lib/modules
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: wireguard-vpn-service
+#   namespace: kubeguard
+# spec:
+#   selector:
+#     app: kubeguard
+#   ports:
+#   - name: wireguard-vpn
+#     port: 51820
+#     targetPort: 51820
+
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: wireguard-console-service
+#   namespace: kubeguard
+# spec:
+#   selector:
+#     app: kubeguard
+#   ports:
+#   - name: wireguard-console
+#     port: 51821
+#     targetPort: 51821

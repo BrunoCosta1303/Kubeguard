@@ -29,3 +29,5 @@ https://blog.jamesclonk.io/posts/wireguard-on-kubernetes/
 --> Configure workernodes roles and specs in the clusterbuild.tf 
 
 --> Merge the vpcbuild with the clusterbuild for ease of use 
+
+~/go/bin/tfk8s -f resources/wireguard-deployment.yaml -o output.tf
