@@ -86,5 +86,5 @@ EOF
    73  apt install kubelet kubeadm kubectl
    74  lsmod | grep br_netfilter
    75  systemctl disable containerd
-   76  kubeadm join 192.168.15.186:6443 --token h7nhp1.avvj9c7mks3p260t 	--discovery-token-ca-cert-hash sha256:e782e45b7f1dd9d5ed0c73d82ecdbf8655c34c631b369b323545ae6779541d6b
+   76  kubeadm join :6443 --token 	--discovery-token-ca-cert-hash sha256:e782e45b7f1dd9d5ed0c73d82ecdbf8655c34c631b369b323545ae6779541d6b
    77  history
