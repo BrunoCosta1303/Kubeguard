@@ -17,7 +17,6 @@ spec:
 #! Deployment definition for AdGuard Home for a single instance container,
 #! storing configuration data on a persistent volume claim.
 #! The management web interface on port 3000 and the DNS port 53
-#! are be made accessible via Kubernetes service definition, see further below.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -26,7 +25,7 @@ metadata:
   labels:
     app: kubeguard
 spec:
-  replicas: 1
+  replicas: 2
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -72,37 +71,4 @@ spec:
       - name: adguardhome-logs
         emptyDir: {}
 
-# ---
-# #! Service definition for all Kubeguard Components, being: 
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   name: adguard-dns-service
-#   namespace: kubeguard
-# spec:
-#   selector:
-#     app: kubeguard
-#   ports:
-#   - name: domain-name-service
-#     port: 53
-#     targetPort: 53
-
-
-
-# ---
-# #! Service definition for all Kubeguard Components, being: 
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   name: adguard-console-service
-#   namespace: kubeguard
-# spec:
-#   selector:
-#     app: kubeguard
-#   ports:
-#   - name: adguard-console
-#     port: 3000
-#     protocol: TCP
-#     targetPort: 3000
-#   type: NodePort
 

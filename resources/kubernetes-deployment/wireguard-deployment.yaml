@@ -1,10 +1,14 @@
+#! Deployment definition for Wireguard Easy,
+#! It mounts the /lib/module unix directory so that kernel module for wireguard can be accessed.
+#! Also, it mounts a path for storing wg0.conf with the peer and server configurations.
+#! The management web interface on port 51821 and the DNS port 51820
 kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: wireguard
   namespace: kubeguard
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: kubeguard
@@ -21,12 +25,21 @@ spec:
           protocol: UDP
         - containerPort: 51821
           protocol: TCP
+        resources:
+          requests:
+            cpu: "512m"
+            memory: "256Mi"
+          limits:
+            cpu: "768m"
+            memory: "512Mi"
         env:
         - name: WG_HOST
           value: localhost
-        - name: vpn.example.com
+        - name: WG_DEFAULT_DNS
           value: 1.1.1.1
-        securityContext: # I am not sure if following is required, I haven't tried it without
+        - name: PASSWORD
+          value: asdfghjk
+        securityContext:
           privileged: true
           capabilities:
             add:
@@ -44,30 +57,4 @@ spec:
       - name: lib-volume
         hostPath:
           path: /lib/modules
-# ---
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   name: wireguard-vpn-service
-#   namespace: kubeguard
-# spec:
-#   selector:
-#     app: kubeguard
-#   ports:
-#   - name: wireguard-vpn
-#     port: 51820
-#     targetPort: 51820
 
-# ---
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   name: wireguard-console-service
-#   namespace: kubeguard
-# spec:
-#   selector:
-#     app: kubeguard
-#   ports:
-#   - name: wireguard-console
-#     port: 51821
-#     targetPort: 51821

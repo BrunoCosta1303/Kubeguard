@@ -31,3 +31,10 @@ https://blog.jamesclonk.io/posts/wireguard-on-kubernetes/
 --> Merge the vpcbuild with the clusterbuild for ease of use 
 
 ~/go/bin/tfk8s -f resources/wireguard-deployment.yaml -o output.tf
+
+
+Runnning terragrunt 
+
+https://terragrunt.gruntwork.io/docs/features/execute-terraform-commands-on-multiple-modules-at-once/
+
+For each region you with to use, create new worker folder 
